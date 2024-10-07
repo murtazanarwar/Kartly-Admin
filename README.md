@@ -27,5 +27,6 @@ npx shadcn@latest init
 Which style would you like to use? › Default
 Which color would you like to use as base color? › Slate
 Do you want to use CSS variables for colors? › yes
-
 ```
+## Development Steps
+1. Created a (root) directory in app directory so that url does not get affected and paste page.tsx inside (root) directory.
