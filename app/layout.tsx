@@ -5,6 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { ModalProvider } from "@/provider/modal-provider";
 
 import "./globals.css";
+import { ToasterProvider } from "@/provider/toast-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           >
+            <ToasterProvider />
             <ModalProvider />
           {children}
         </body>
