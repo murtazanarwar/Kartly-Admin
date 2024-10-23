@@ -22,7 +22,6 @@ import { Form,
     FormLabel, 
     FormMessage} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import ImageUpload from "@/components/ui/image-upload";
     
 const formSchema = z.object({
     name: z.string().min(1),
