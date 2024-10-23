@@ -80,8 +80,9 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
     const onDelete = async () => {
         try {
             setLoading(true)
-            await axios.delete(`/api/${params.storeId}/billboards/${params.BillboardId}`)
-            router.push('/')
+            await axios.delete(`/api/${params.storeId}/billboards/${params.billboardId}`)
+            router.refresh();
+            router.push(`/${params.storeId}/billboards`)
             toast.success("Billboard Deleted")
         } catch (error) {
             console.log("[DELETE] " , error);
@@ -152,7 +153,6 @@ export const BillboardForm: React.FC<BillboardFormProps> = ({
                     </Button>
                 </form>
             </Form>
-            <Separator />
         </>
     )
 }
