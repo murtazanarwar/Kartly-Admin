@@ -62,7 +62,7 @@ export function MainNav({
 
   return (
     <div>
-      <div className={`absolute z-50 sm:static bg-white sm:bg-transparent sm:min-h-0 left-0 sm:left-auto ${isOpen ? 'top-[9%] mb-4' : 'top-[-100%]'} sm:top-auto w-full sm:w-auto flex sm:flex-none items-center sm:items-start px-5 pt-4 sm:px-0`}>
+      <div className={`absolute z-50 border border-t-0 border-black sm:border-0 sm:static bg-white sm:bg-transparent sm:min-h-0 left-0 sm:left-auto ${isOpen ? 'top-[9%]' : 'top-[-100%]'} sm:top-auto w-full sm:w-auto flex sm:flex-none items-center sm:items-start px-5 pt-4 sm:px-0 sm:pt-0`}>
         <nav className={cn("flex flex-col sm:flex-row sm:items-center sm:space-x-4 lg:space-x-6 gap-8 sm:gap-0", className)}>
           {routes.map((route) => (
             <Link onClick={toggleNavbar}
@@ -79,7 +79,7 @@ export function MainNav({
         </nav>
       </div>
 
-      <div className="flex items-center absolute right-[8%] top-5 cursor-pointer sm:hidden">
+      <div className="flex items-center absolute right-12 top-5 cursor-pointer sm:hidden">
         {!isOpen ? (
           <Menu onClick={toggleNavbar} />
         ) : (
