@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { ClerkProvider } from '@clerk/nextjs'
 
+import { ClerkProvider } from '@clerk/nextjs'
 import { ModalProvider } from "@/provider/modal-provider";
+import { ToasterProvider } from "@/provider/toast-provider";
 
 import "./globals.css";
-import { ToasterProvider } from "@/provider/toast-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
