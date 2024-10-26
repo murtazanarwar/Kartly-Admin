@@ -1,6 +1,5 @@
 import { CreditCardIcon, IndianRupee, Package } from "lucide-react";
 
-import prismadb from "@/lib/prismadb";
 import { formatter } from "@/lib/utils";
 import { getTotalRevenue } from "@/actions/get-total-revenue";
 import { Heading } from "@/components/ui/heading";
@@ -21,7 +20,7 @@ interface DashboardPageProps {
 const DashboardPage: React.FC<DashboardPageProps> = async ({
     params
 }) => {
-    
+
     const totalRevenue = await getTotalRevenue(params.storeId);
     const salesCount = await getSalesCount(params.storeId);
     const stockCount = await getStockCount(params.storeId);
