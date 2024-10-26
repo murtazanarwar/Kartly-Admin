@@ -28,7 +28,7 @@ export async function POST(
             return new NextResponse("Phone Number are Required", { status: 400 });
         }
 
-        const products = await prismadb.product.findMany({
+        await prismadb.product.findMany({
             where: {
                 id: {
                     in: productIds
@@ -36,7 +36,7 @@ export async function POST(
             }
         });
 
-        const order = await prismadb.order.create({
+        await prismadb.order.create({
             data: {
                 storeId: params.storeId,
                 isPaid: false,
