@@ -15,6 +15,7 @@ import { Category,
 import toast from "react-hot-toast";
 import axios from "axios";
 
+
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
@@ -36,9 +37,11 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox";
+import Tiptap from "@/components/ui/Tiptap";
     
 const formSchema = z.object({
     name: z.string().min(1),
+    description: z.string().min(1),
     images: z.object({ url: z.string() }).array(),
     price: z.coerce.number().min(1),
     categoryId: z.string().min(1),
@@ -84,6 +87,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             price: parseFloat(String(initialData?.price)),
         } : {
             name: '',
+            description: '',
             images: [],
             price: 0,
             categoryId: '',
@@ -169,7 +173,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                             <FormMessage />
                         </FormItem>
                     )}
-                    />
+                />
                     <div className="grid grid-cols-3 gap-8">
                         <FormField 
                             control={form.control}
@@ -337,6 +341,20 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                             This product will not appear anywhere in the store
                                         </FormDescription>
                                     </div>
+                                </FormItem>
+                        )}/>
+                    </div>
+                    <div className="flex justify-start">
+                    <FormField
+                            control={form.control}
+                            name="description"
+                            render={({field}) => (
+                                <FormItem className="w-[50%]">
+                                    <FormLabel>Description</FormLabel>
+                                    <FormControl>
+                                        <Tiptap {...field}/>
+                                    </FormControl>
+                                    <FormMessage />
                                 </FormItem>
                         )}/>
                     </div>

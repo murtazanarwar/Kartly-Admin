@@ -89,6 +89,7 @@ model Product {
   categoryId    String
   category      Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
   name          String
+  description   String
   price         Decimal
   isFeatured    Boolean   @default(false)
   isArchived    Boolean   @default(false)
@@ -143,3 +144,7 @@ model OrderItem {
     @@index([orderId])
     @@index([productId])
 }
+
+// model Reviews {
+//   id String @id @default(uuid())
+// }
