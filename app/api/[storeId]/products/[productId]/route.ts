@@ -8,7 +8,7 @@ export async function GET (
 ){
     try {
         const url = new URL(req.url);
-        console.log(url);
+        // console.log(url);
 
         if(!params.productId) {
             return new NextResponse("Product Id is required", { status: 400 })
@@ -42,6 +42,7 @@ export async function PATCH(
 
         const { 
             name,
+            description,
             images,
             price,
             categoryId,
@@ -101,6 +102,7 @@ export async function PATCH(
             data: {
                 name,
                 price,
+                description,
                 categoryId,
                 sizeId,
                 colorId,

@@ -37,11 +37,11 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox";
-import Tiptap from "@/components/ui/Tiptap";
+import { Textarea } from "@/components/ui/textarea";
     
 const formSchema = z.object({
     name: z.string().min(1),
-    description: z.string().min(1),
+    description: z.string(),
     images: z.object({ url: z.string() }).array(),
     price: z.coerce.number().min(1),
     categoryId: z.string().min(1),
@@ -346,17 +346,21 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                     </div>
                     <div className="flex justify-start">
                     <FormField
-                            control={form.control}
-                            name="description"
-                            render={({field}) => (
-                                <FormItem className="w-[50%]">
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl>
-                                        <Tiptap {...field}/>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                        )}/>
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem className="w-[50%]">
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                    disabled={loading}
+                                    placeholder="Product Description"
+                                    {...field}
+                                />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                    />
                     </div>
                     <Button type="submit" disabled={loading} className="ml-auto" >
                         {action}
