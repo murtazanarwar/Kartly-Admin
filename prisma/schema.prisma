@@ -142,8 +142,8 @@ model OrderItem {
 
 model Customer {
   id                        String    @id @default(uuid())
-  username                  String    @unique
-  email                     String    @unique
+  username                  String    
+  email                     String    
   password                  String
   storeId                   String
   isVerified                Boolean   @default(false)
@@ -155,7 +155,8 @@ model Customer {
   updatedAt                 DateTime  @updatedAt
   store                     Store     @relation("StoreToCustomer", fields: [storeId], references: [id])
   reviews                   Review[]  @relation("CustomerToReview")
-
+  
+  @@unique([email, storeId])
   @@index([storeId])
 }
 
