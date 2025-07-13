@@ -167,6 +167,7 @@ model Review {
   comment    String
   customerId String
   createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
   product    Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
   customer   Customer      @relation("CustomerToReview", fields: [customerId], references: [id])
   images     ReviewImage[]

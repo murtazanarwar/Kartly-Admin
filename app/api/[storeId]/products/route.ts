@@ -82,7 +82,8 @@ export async function POST(
                     }
                 },
                 storeId: params.storeId
-            }
+            },
+            // include: { images: true }
         });
 
         return NextResponse.json(product);
