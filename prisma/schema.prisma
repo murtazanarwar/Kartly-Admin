@@ -49,7 +49,7 @@ model Category {
 
   @@index([storeId])
   @@index([billboardId])
-}
+} 
 
 model Size {
   id        String    @id @default(uuid())
@@ -116,15 +116,18 @@ model Image {
 }
 
 model Order {
-  id         String      @id @default(uuid())
-  storeId    String
-  isPaid     Boolean     @default(false)
-  phone      String      @default("")
-  address    String      @default("Not Set")
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  store      Store       @relation("StoreToOrder", fields: [storeId], references: [id])
-  orderItems OrderItem[]
+  id                  String      @id @default(uuid())
+  storeId             String
+  isPaid              Boolean     @default(false)
+  phone               String      @default("")
+  address             String      @default("Not Set")
+  razorpayOrderId     String?
+  razorpayPaymentId   String?
+  paidAt              DateTime?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  store               Store       @relation("StoreToOrder", fields: [storeId], references: [id])
+  orderItems          OrderItem[]
 
   @@index([storeId])
 }
@@ -155,6 +158,8 @@ model Customer {
   updatedAt                 DateTime  @updatedAt
   store                     Store     @relation("StoreToCustomer", fields: [storeId], references: [id])
   reviews                   Review[]  @relation("CustomerToReview")
+  loyaltyPoints             LoyaltyPoint[]
+  couponUsages              CouponUsage[]
   
   @@unique([email, storeId])
   @@index([storeId])
@@ -185,4 +190,41 @@ model ReviewImage {
   review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
 
   @@index([reviewId])
+}
+
+model Coupon {
+  id             String   @id @default(cuid())
+  code           String   @unique
+  discountType   String   // "PERCENTAGE" or "FIXED"
+  discountValue  Float
+  minCartValue   Float?
+  expiresAt      DateTime?
+  usageLimit     Int?
+  usedCount      Int      @default(0)
+  userUsages     CouponUsage[]
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
+
+model CouponUsage {
+  id         String   @id @default(cuid())
+  customerId String
+  couponId   String
+  usedAt     DateTime @default(now())
+  
+  coupon     Coupon   @relation(fields: [couponId], references: [id])
+  customer   Customer @relation(fields: [customerId], references: [id])
+  @@index([customerId])
+  @@index([couponId]) 
+}
+
+model LoyaltyPoint {
+  id         String   @id @default(cuid())
+  customerId String   @unique
+  points     Int
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  customer   Customer @relation(fields: [customerId], references: [id])
+  @@index([customerId])
 }

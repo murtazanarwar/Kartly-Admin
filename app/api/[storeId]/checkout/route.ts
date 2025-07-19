@@ -1,65 +1,129 @@
-import prismadb from "@/lib/prismadb";
 import { NextResponse } from "next/server";
-
+import { z } from "zod";
+import prismadb from "@/lib/prismadb";
+import razorpay from "@/lib/razorpay";
 
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
+
+const bodySchema = z.object({
+  productIds: z.array(z.string()).nonempty("Product IDs are required"),
+  phoneNumber: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number must be at most 15 digits")
+    .regex(/^\+?\d+$/, "Phone must contain only digits and may start with +"),
+  address: z.string().min(5, "Please enter a valid shipping address"),
+  customerId: z.string().nonempty("Customer ID is required"),
+});
 
 export async function OPTIONS() {
-    return NextResponse.json({}, { headers: corsHeaders });
-};
-
+  return NextResponse.json({}, { headers: corsHeaders });
+}
 
 export async function POST(
-    req: Request,
-    { params } : { params: { storeId: string }}
+  req: Request,
+  { params }: { params: { storeId?: string } }
 ) {
-    try {
-        const { productIds, phoneNumber } = await req.json();
+  const storeId = params.storeId;
+  if (!storeId) {
+    return NextResponse.json(
+      { success: false, error: "Store ID is required" },
+      { status: 400, headers: corsHeaders }
+    );
+  }
 
-        if(!productIds || productIds.length === 0){
-            return new NextResponse("Product Ids are Required", { status: 400 });
-        }
+  const json = await req.json();
+  const parsed = bodySchema.safeParse(json);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { success: false, error: parsed.error.format() },
+      { status: 400, headers: corsHeaders }
+    );
+  }
+  const { productIds, phoneNumber, address, customerId } = parsed.data;
 
-        if(!phoneNumber){
-            return new NextResponse("Phone Number are Required", { status: 400 });
-        }
+  const products = await prismadb.product.findMany({
+    where: { id: { in: productIds }, storeId },
+  });
+  if (products.length === 0) {
+    return NextResponse.json(
+      { success: false, error: "No valid products found" },
+      { status: 404, headers: corsHeaders }
+    );
+  }
 
-        await prismadb.product.findMany({
-            where: {
-                id: {
-                    in: productIds
-                }
-            }
-        });
+  const totalAmount = products.reduce(
+    (sum, p) => sum + p.price.toNumber() * 100,
+    0
+  );
 
-        await prismadb.order.create({
-            data: {
-                storeId: params.storeId,
-                isPaid: false,
-                orderItems: {
-                    create: productIds.map((productId: string) => ({
-                        product: {
-                            connect: {
-                                id:productId
-                            }
-                        }
-                    }))
-                },
-                phone: phoneNumber,
-            }
-        });
+  let order;
+  try {
+    order = await prismadb.order.create({
+      data: {
+        storeId,
+        phone: phoneNumber,
+        address,
+        isPaid: false,
+        orderItems: {
+          create: productIds.map((id) => ({
+            product: { connect: { id } },
+          })),
+        },
+      },
+    });
 
-        return NextResponse.json({ url: `${process.env.FRONTEND_STORE_URL}/cart?success=1`}, {
-            headers: corsHeaders
-        });
-    } catch (error) {
-        console.log('[CHECKOUT_POST]', error);
-        return NextResponse.json({ url: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`}, {
-            headers: corsHeaders
-        });
+    const razorpayOrder = await razorpay.orders.create({
+      amount: totalAmount,
+      currency: "INR",
+      receipt: `receipt_${Math.random().toString(36).slice(2, 10)}`,
+      notes: { orderId: order.id },
+    });
+
+    order = await prismadb.order.update({
+        where: { id: order.id },
+        data: { razorpayOrderId: razorpayOrder.id },
+    });
+
+    const pointsEarned = Math.floor(totalAmount / 100);
+    await prismadb.loyaltyPoint.create({
+      data: {
+        customerId,
+        points: pointsEarned,
+      }
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        orderId: order.id,
+        razorpayOrderId: razorpayOrder.id,
+        razorpayKey: process.env.RAZORPAY_KEY_ID,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+      },
+      { headers: corsHeaders }
+    );
+  } catch (err) {
+    console.error("[CHECKOUT_POST]", err);
+    if (order) {
+      try {
+        await prismadb.order.delete({ where: { id: order.id } });
+      } catch (cleanupErr) {
+        console.error("Failed to cleanup order:", cleanupErr);
+      }
     }
+
+    return NextResponse.json(
+      {
+        success: false,
+        redirectUrl: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
+      },
+      { headers: corsHeaders }
+    );
+  }
 }
