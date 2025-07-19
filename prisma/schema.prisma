@@ -21,6 +21,7 @@ model Store {
   products   Product[]   @relation("StoreToProduct")
   orders     Order[]     @relation("StoreToOrder")
   customers  Customer[]  @relation("StoreToCustomer")
+  coupons    Coupon[]  @relation("StoreToCoupon")
 }
 
 model Billboard {
@@ -194,7 +195,8 @@ model ReviewImage {
 
 model Coupon {
   id             String   @id @default(cuid())
-  code           String   @unique
+  code           String
+  storeId        String
   discountType   String   // "PERCENTAGE" or "FIXED"
   discountValue  Float
   minCartValue   Float?
@@ -204,6 +206,9 @@ model Coupon {
   userUsages     CouponUsage[]
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
+  store          Store    @relation("StoreToCoupon", fields: [storeId], references: [id])
+  @@unique([code, storeId])
+  @@index([storeId])
 }
 
 model CouponUsage {

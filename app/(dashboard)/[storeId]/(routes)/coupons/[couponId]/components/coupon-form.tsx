@@ -3,9 +3,8 @@
 import * as z from "zod";
 import { useState } from "react";
 import { Trash } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Coupon } from "@prisma/client";
 import toast from "react-hot-toast";
@@ -49,15 +48,17 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
   const defaultValues: CouponFormValues = initialData
     ? {
         code: initialData.code,
-        discountType: initialData.discountType as 'PERCENTAGE' | 'FIXED',
+        discountType: initialData.discountType as "PERCENTAGE" | "FIXED",
         discountValue: initialData.discountValue,
         minCartValue: initialData.minCartValue ?? undefined,
-        expiresAt: initialData.expiresAt ? initialData.expiresAt.toISOString().split('T')[0] : undefined,
+        expiresAt: initialData.expiresAt
+          ? initialData.expiresAt.toISOString().split("T")[0]
+          : undefined,
         usageLimit: initialData.usageLimit ?? undefined,
       }
     : {
-        code: '',
-        discountType: 'PERCENTAGE',
+        code: "",
+        discountType: "PERCENTAGE",
         discountValue: 0,
         minCartValue: undefined,
         expiresAt: undefined,
@@ -70,7 +71,9 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
   });
 
   const title = initialData ? "Edit Coupon" : "Create Coupon";
-  const description = initialData ? "Edit an existing coupon." : "Add a new coupon.";
+  const description = initialData
+    ? "Edit an existing coupon."
+    : "Add a new coupon.";
   const toastMessage = initialData ? "Coupon updated." : "Coupon created.";
   const action = initialData ? "Save Changes" : "Create";
 
@@ -78,7 +81,10 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
     try {
       setLoading(true);
       if (initialData) {
-        await axios.patch(`/api/${params.storeId}/coupons/${params.couponId}`, data);
+        await axios.patch(
+          `/api/${params.storeId}/coupons/${params.couponId}`,
+          data
+        );
       } else {
         await axios.post(`/api/${params.storeId}/coupons`, data);
       }
@@ -96,7 +102,9 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/${params.storeId}/coupons/${params.couponId}`);
+      await axios.delete(
+        `/api/${params.storeId}/coupons/${params.couponId}`
+      );
       router.refresh();
       router.push(`/${params.storeId}/coupons`);
       toast.success("Coupon deleted.");
@@ -132,7 +140,10 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
       </div>
       <Separator />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8 w-full"
+        >
           <div className="grid grid-cols-2 gap-8">
             <FormField
               control={form.control}
@@ -141,12 +152,17 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Coupon Code</FormLabel>
                   <FormControl>
-                    <Input disabled={loading} placeholder="e.g. SAVE20" {...field} />
+                    <Input
+                      disabled={loading}
+                      placeholder="e.g. SAVE20"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="discountType"
@@ -154,7 +170,11 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Discount Type</FormLabel>
                   <FormControl>
-                    <select disabled={loading} {...field} className="block w-full p-2 border rounded">
+                    <select
+                      disabled={loading}
+                      {...field}
+                      className="block w-full p-2 border rounded"
+                    >
                       <option value="PERCENTAGE">Percentage</option>
                       <option value="FIXED">Fixed Amount</option>
                     </select>
@@ -163,6 +183,7 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="discountValue"
@@ -170,12 +191,20 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Discount Value</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} {...field} />
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(e.target.valueAsNumber)
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="minCartValue"
@@ -183,12 +212,24 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Minimum Cart Value</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} {...field} />
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === ""
+                            ? undefined
+                            : e.target.valueAsNumber
+                        )
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="expiresAt"
@@ -196,12 +237,17 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Expiration Date</FormLabel>
                   <FormControl>
-                    <Input type="date" disabled={loading} {...field} />
+                    <Input
+                      type="date"
+                      disabled={loading}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="usageLimit"
@@ -209,13 +255,25 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>Usage Limit</FormLabel>
                   <FormControl>
-                    <Input type="number" disabled={loading} {...field} />
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === ""
+                            ? undefined
+                            : e.target.valueAsNumber
+                        )
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
           <Button type="submit" disabled={loading} className="ml-auto">
             {action}
           </Button>
@@ -223,4 +281,4 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData }) => {
       </Form>
     </>
   );
-}
+};
