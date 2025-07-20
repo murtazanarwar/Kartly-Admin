@@ -124,13 +124,19 @@ model Order {
   address             String      @default("Not Set")
   razorpayOrderId     String?
   razorpayPaymentId   String?
+  couponId            String?
+  customerId          String
   paidAt              DateTime?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   store               Store       @relation("StoreToOrder", fields: [storeId], references: [id])
+  customer            Customer    @relation("CustomerToOrder", fields: [customerId], references: [id])
+  coupon              Coupon?     @relation(fields: [couponId], references: [id])
   orderItems          OrderItem[]
 
   @@index([storeId])
+  @@index([couponId])
+  @@index([customerId])
 }
 
 model OrderItem {
@@ -159,6 +165,7 @@ model Customer {
   updatedAt                 DateTime  @updatedAt
   store                     Store     @relation("StoreToCustomer", fields: [storeId], references: [id])
   reviews                   Review[]  @relation("CustomerToReview")
+  orders                    Order[]  @relation("CustomerToOrder")
   loyaltyPoints             LoyaltyPoint[]
   couponUsages              CouponUsage[]
   
@@ -207,6 +214,7 @@ model Coupon {
   active         Boolean  @default(true)
   createdAt      DateTime @default(now())
   store          Store    @relation("StoreToCoupon", fields: [storeId], references: [id])
+  orders         Order[]
   @@unique([code, storeId])
   @@index([storeId])
 }

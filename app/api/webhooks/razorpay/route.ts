@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       const order = await prismadb.order.findFirst({
         where: { razorpayOrderId },
       });
+
       if (order && !order.isPaid) {
         await prismadb.order.update({
           where: { id: order.id },
@@ -55,6 +56,21 @@ export async function POST(req: Request) {
             paidAt: new Date(),
           },
         });
+
+        if(order.couponId){          
+          await prismadb.$transaction([
+            prismadb.couponUsage.create({
+              data: {
+                couponId: order.couponId,
+                customerId: order.customerId, 
+              },
+            }),
+            prismadb.coupon.update({
+              where: { id: order.couponId },
+              data: { usedCount: { increment: 1 } },
+            }),
+          ]);
+        }
       }
       return NextResponse.json({ ok: true });
     } catch (err) {
@@ -63,6 +79,5 @@ export async function POST(req: Request) {
     }
   }
 
-  // 3) Acknowledge all other events
   return NextResponse.json({ ok: true });
 }

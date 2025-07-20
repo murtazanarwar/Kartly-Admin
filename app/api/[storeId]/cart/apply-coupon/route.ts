@@ -1,13 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
+import { z } from "zod";
 
-export async function POST(request: NextRequest) {
+const corsHeaders = {
+  'Access-Control-Allow-Origin': process.env.FRONTEND_STORE_URL || 'http://localhost:3000',
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+const bodySchema = z.object({
+  productIds: z.array(z.string()).nonempty("Product IDs are required"),
+  customerId: z.string().nonempty("Customer ID is required"),
+  couponCode: z.string(),
+});
+
+export async function OPTIONS() {
+  return NextResponse.json({}, { headers: corsHeaders });
+}
+
+export async function POST(request: NextRequest, { params }: { params: { storeId: string } } ) {
   try {
-    const { couponCode, customerId, cartTotal } = await request.json();
+    const storeId = params.storeId;
+    if (!storeId) {
+      return NextResponse.json(
+        { success: false, error: "Store ID is required" },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const json = await request.json();
+    const parsed = bodySchema.safeParse(json);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: parsed.error.format() },
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    const { couponCode, customerId, productIds } = parsed.data;
+
+    const products = await prismadb.product.findMany({
+      where: { id: { in: productIds }, storeId },
+    });
+    if (products.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "No valid products found" },
+        { status: 404, headers: corsHeaders }
+      );
+    }
+  
+    let cartTotal = products.reduce(
+      (sum, p) => sum + p.price.toNumber() * 100,
+      0
+    );
 
     const coupon = await prismadb.coupon.findUnique({
-      where: { code: couponCode.trim() },
+      where: {
+        code_storeId: {
+          code: couponCode.trim(),
+          storeId,
+        },
+      },
     });
+
     if (!coupon || !coupon.active) {
       return NextResponse.json(
         { error: "Invalid or inactive coupon." },
@@ -39,6 +94,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
     if (
       coupon.usageLimit !== null &&
       coupon.usedCount >= coupon.usageLimit
@@ -49,26 +105,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let discount: number;
+    // Calculate discount
+const cartTotalPaise = products.reduce(
+  (sum, p) => sum + p.price.toNumber() * 100,
+  0
+);
+
+    // 2. Compute discount in paise
+    let discountPaise: number;
     if (coupon.discountType === "PERCENTAGE") {
-      discount = Math.floor((cartTotal * coupon.discountValue) / 100);
+      discountPaise = Math.floor((cartTotalPaise * coupon.discountValue) / 100);
     } else {
-      discount = coupon.discountValue;
+      discountPaise = coupon.discountValue * 100; // assume flat value in rupees
     }
 
-    await prismadb.$transaction([
-      prismadb.couponUsage.create({
-        data: { couponId: coupon.id, customerId },
-      }),
-      prismadb.coupon.update({
-        where: { id: coupon.id },
-        data: { usedCount: { increment: 1 } },
-      }),
-    ]);
+    // 3. Convert to rupees for the client
+    const discount = discountPaise / 100;
 
     return NextResponse.json({ discount, couponId: coupon.id });
   } catch (err: any) {
-        console.error("[APPLY_COUPON_POST]", err);    return NextResponse.json(
+    console.error("[APPLY_COUPON_POST]", err);
+    return NextResponse.json(
       { error: "Server error applying coupon." },
       { status: 500 }
     );

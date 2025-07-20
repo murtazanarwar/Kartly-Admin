@@ -4,6 +4,13 @@ import jwt from "jsonwebtoken";
 import prismadb from "@/lib/prismadb";
 
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": process.env.FRONTEND_STORE_URL || "http://localhost:3000",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Credentials": "true",
+}
+
 export async function POST(request: NextRequest, { params } : { params: { storeId: string }}) {
   try {
     const { email, password } = await request.json();
@@ -73,12 +80,13 @@ export async function POST(request: NextRequest, { params } : { params: { storeI
         name: customer.username,
         email: customer.email,
       }, token },
-      { status: 200 }
+      { status: 200, headers: corsHeaders }
     );
+
 
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60, // 1 hour
