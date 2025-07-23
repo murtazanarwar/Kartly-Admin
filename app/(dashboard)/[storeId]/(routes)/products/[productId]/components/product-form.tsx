@@ -44,6 +44,7 @@ const formSchema = z.object({
     description: z.string(),
     images: z.object({ url: z.string() }).array(),
     price: z.coerce.number().min(1),
+    stock: z.coerce.number(),
     categoryId: z.string().min(1),
     sizeId: z.string().min(1),
     colorId: z.string().min(1),
@@ -90,6 +91,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             description: '',
             images: [],
             price: 0,
+            stock: 0,
             categoryId: '',
             sizeId: '',
             colorId: '',
@@ -195,6 +197,18 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                     <FormLabel>Price</FormLabel>
                                     <FormControl>
                                         <Input disabled={loading} placeholder="Product Price" {...field}></Input>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                        <FormField 
+                            control={form.control}
+                            name="stock"
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>Stock</FormLabel>
+                                    <FormControl>
+                                        <Input disabled={loading} placeholder="Stock" {...field}></Input>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

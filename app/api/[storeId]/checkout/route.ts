@@ -4,13 +4,20 @@ import prismadb from "@/lib/prismadb";
 import razorpay from "@/lib/razorpay";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': process.env.FRONTEND_STORE_URL || 'http://localhost:3000',
+  "Access-Control-Allow-Origin": process.env.FRONTEND_STORE_URL || "http://localhost:3000",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 const bodySchema = z.object({
-  productIds: z.array(z.string()).nonempty("Product IDs are required"),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().nonempty(),
+        quantity: z.number().int().min(1),
+      })
+    )
+    .nonempty("Cart items are required"),
   phoneNumber: z
     .string()
     .min(10, "Phone number must be at least 10 digits")
@@ -31,40 +38,48 @@ export async function POST(
   { params }: { params: { storeId?: string } }
 ) {
   const storeId = params.storeId;
-  if (!storeId)
+  if (!storeId) {
     return NextResponse.json(
       { success: false, error: "Store ID is required" },
       { status: 400, headers: corsHeaders }
     );
+  }
 
   const json = await req.json();
   const parsed = bodySchema.safeParse(json);
-  if (!parsed.success)
+  if (!parsed.success) {
     return NextResponse.json(
       { success: false, error: parsed.error.format() },
       { status: 400, headers: corsHeaders }
     );
+  }
 
-  const { productIds, phoneNumber, address, customerId, discount, couponId } =
+  const { items, phoneNumber, address, customerId, discount, couponId } =
     parsed.data;
 
+  // Fetch product details (optional: validate existence)
+  const productIds = items.map((i) => i.productId);
   const products = await prismadb.product.findMany({
     where: { id: { in: productIds }, storeId },
   });
-  if (products.length === 0)
+
+  if (products.length !== items.length) {
     return NextResponse.json(
-      { success: false, error: "No valid products found" },
+      { success: false, error: "One or more products not found" },
       { status: 404, headers: corsHeaders }
     );
+  }
 
-  let totalAmount = products.reduce(
-    (sum, p) => sum + p.price.toNumber() * 100,
-    0
-  );
+  // Calculate total (in paise)
+  let totalAmount = items.reduce((sum, { productId, quantity }) => {
+    const prod = products.find((p) => p.id === productId)!;
+    return sum + prod.price.toNumber() * quantity * 100;
+  }, 0);
   totalAmount -= discount;
 
   let order;
   try {
+    // Create order and items (no stock changes here)
     order = await prismadb.order.create({
       data: {
         storeId,
@@ -74,13 +89,15 @@ export async function POST(
         customerId,
         ...(couponId && { couponId }),
         orderItems: {
-          create: productIds.map((id) => ({
-            product: { connect: { id } },
+          create: items.map(({ productId, quantity }) => ({
+            product: { connect: { id: productId } },
+            quantity,
           })),
         },
       },
     });
 
+    // Create Razorpay order
     const razorpayOrder = await razorpay.orders.create({
       amount: totalAmount,
       currency: "INR",
@@ -88,7 +105,8 @@ export async function POST(
       notes: { orderId: order.id },
     });
 
-    order = await prismadb.order.update({
+    // Persist Razorpay order ID
+    await prismadb.order.update({
       where: { id: order.id },
       data: { razorpayOrderId: razorpayOrder.id },
     });
@@ -106,18 +124,14 @@ export async function POST(
     );
   } catch (err) {
     console.error("[CHECKOUT_POST]", err);
+    // Cleanup on error
     if (order?.id) {
       try {
         await prismadb.order.delete({ where: { id: order.id } });
-      } catch (cleanupErr) {
-        console.error("Failed to cleanup order:", cleanupErr);
-      }
+      } catch {}
     }
     return NextResponse.json(
-      {
-        success: false,
-        redirectUrl: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1`,
-      },
+      { success: false, redirectUrl: `${process.env.FRONTEND_STORE_URL}/cart?canceled=1` },
       { headers: corsHeaders }
     );
   }

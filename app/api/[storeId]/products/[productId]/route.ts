@@ -45,6 +45,7 @@ export async function PATCH(
             description,
             images,
             price,
+            stock,
             categoryId,
             sizeId,
             colorId,
@@ -102,6 +103,7 @@ export async function PATCH(
             data: {
                 name,
                 price,
+                stock,
                 description,
                 categoryId,
                 sizeId,

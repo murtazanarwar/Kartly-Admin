@@ -144,7 +144,7 @@ model OrderItem {
   id        String  @id @default(uuid())
   orderId   String
   productId String
-  stock     Int     @default(1)
+  quantity  Int     @default(1)
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 

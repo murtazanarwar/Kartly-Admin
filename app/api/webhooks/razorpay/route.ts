@@ -6,7 +6,7 @@ export const config = {
   api: { bodyParser: false },
 };
 
-// utility to buffer the ReadableStream
+// Utility to buffer the ReadableStream
 async function buffer(stream: ReadableStream) {
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
@@ -38,46 +38,78 @@ export async function POST(req: Request) {
   // 2) Parse payload
   const { event, payload } = JSON.parse(bodyText);
   const payment = payload?.payment?.entity;
+
   if (event === "payment.captured" && payment) {
     const { order_id: razorpayOrderId, id: paymentId } = payment;
 
     try {
-      // lookup your order by razorpayOrderId
+      // 3) Load the order with its items
       const order = await prismadb.order.findFirst({
         where: { razorpayOrderId },
+        include: {
+          orderItems: {
+            select: { productId: true, quantity: true },
+          },
+        },
       });
 
       if (order && !order.isPaid) {
-        await prismadb.order.update({
-          where: { id: order.id },
-          data: {
-            isPaid: true,
-            razorpayPaymentId: paymentId,
-            paidAt: new Date(),
-          },
-        });
+        // 4) Prepare updates:
+        const txOperations: any[] = [];
 
-        if(order.couponId){          
-          await prismadb.$transaction([
+        // a) Mark order as paid
+        txOperations.push(
+          prismadb.order.update({
+            where: { id: order.id },
+            data: {
+              isPaid: true,
+              razorpayPaymentId: paymentId,
+              paidAt: new Date(),
+            },
+          })
+        );
+
+        
+        // b) Decrement stock for each product
+        for (const item of order.orderItems) {
+          txOperations.push(
+            prismadb.product.update({
+              where: { id: item.productId },
+              data: { stock: { decrement: item.quantity } },
+            })
+          );
+        }
+
+        // c) If there’s a coupon, record usage + increment count
+        if (order.couponId) {
+          txOperations.push(
             prismadb.couponUsage.create({
               data: {
                 couponId: order.couponId,
-                customerId: order.customerId, 
+                customerId: order.customerId,
               },
             }),
             prismadb.coupon.update({
               where: { id: order.couponId },
               data: { usedCount: { increment: 1 } },
-            }),
-          ]);
+            })
+          );
         }
+
+        // 5) Execute all in one transaction
+        await prismadb.$transaction(txOperations);
       }
+
       return NextResponse.json({ ok: true });
     } catch (err) {
       console.error("[WEBHOOK_HANDLER]", err);
-      return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Processing failed" },
+        { status: 500 }
+      );
     }
   }
 
+  // For other events, just ACK
   return NextResponse.json({ ok: true });
 }
