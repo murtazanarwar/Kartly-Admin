@@ -3,7 +3,7 @@ import crypto from "crypto";
 import prismadb from "@/lib/prismadb";
 import { emitStockUpdate } from "@/lib/emit-stock";
 
-export const config = {
+export const routeSegmentConfig = {
   api: { bodyParser: false },
 };
 
