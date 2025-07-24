@@ -3,10 +3,6 @@ import crypto from "crypto";
 import prismadb from "@/lib/prismadb";
 import { emitStockUpdate } from "@/lib/emit-stock";
 
-export const routeSegmentConfig = {
-  api: { bodyParser: false },
-};
-
 // Utility to buffer the ReadableStream
 async function buffer(stream: ReadableStream) {
   const reader = stream.getReader();
