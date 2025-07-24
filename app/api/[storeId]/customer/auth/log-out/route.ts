@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": process.env.FRONTEND_STORE_URL || "http://localhost:3000",
+  "Access-Control-Allow-Origin": process.env.FRONTEND_STORE_URL || "https://house-holder-hub-store.vercel.app",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
   "Access-Control-Allow-Credentials": "true",
