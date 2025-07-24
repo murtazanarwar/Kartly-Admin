@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const maxDiscount = Math.floor(cartTotal * 0.1);
     const maxPointsAllowed = Math.floor(maxDiscount / 0.1);
 
-    let usePoints = typeof pointsToRedeem === 'number'
+    const usePoints = typeof pointsToRedeem === 'number'
       ? Math.min(pointsToRedeem, currentPoints, maxPointsAllowed)
       : Math.min(currentPoints, maxPointsAllowed);
 

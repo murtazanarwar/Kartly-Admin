@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 
 const Tiptap = ({...props}) => {
+  console.log(props);
   const editor = useEditor({
     extensions: [StarterKit],
     content: '<p>Product Description</p>',

@@ -9,7 +9,7 @@ export type ProductColumn = {
   id: string
   name: string
   price: string
-  stock: Number
+  stock: number
   category: string
   size: string
   color: string
