@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import prismadb from "@/lib/prismadb";
+import { emitStockUpdate } from "@/lib/emit-stock";
 
 export const config = {
   api: { bodyParser: false },
@@ -69,7 +70,6 @@ export async function POST(req: Request) {
           })
         );
 
-        
         // b) Decrement stock for each product
         for (const item of order.orderItems) {
           txOperations.push(
@@ -97,7 +97,15 @@ export async function POST(req: Request) {
         }
 
         // 5) Execute all in one transaction
-        await prismadb.$transaction(txOperations);
+        const results = await prismadb.$transaction(txOperations);
+        
+        // 6) notify socket‑service
+        for (const r of results) {
+          if (r && typeof (r as any).stock === 'number') {
+            const { id, stock } = r as { id: string; stock: number };
+            await emitStockUpdate(id, stock);
+          }
+        }
       }
 
       return NextResponse.json({ ok: true });
