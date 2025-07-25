@@ -1,3 +1,4 @@
+cat > README.md << 'EOF'
 # E-Commerce Admin Platform 🚀
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)  
@@ -49,7 +50,7 @@ Embed your demo videos or GIFs below—replace each \`path/to/demo.*\` with your
 - **Recharts (Analytics)** 📊  
 - **Razorpay (Payments)** 💳  
 - **Resend (Email)** ✉️  
-- **Radix UI (Components)** 🧩
+- **Radix UI (Components)** 🧩  
 
 ---
 
@@ -70,78 +71,52 @@ Embed your demo videos or GIFs below—replace each \`path/to/demo.*\` with your
 
 ---
 
-## 📥 Installation
+# 📥 Installation Guide
 
-1. **Clone the repository**  
-   \`\`\`bash
-   git clone https://github.com/your-username/e-commerce-admin.git
-   cd e-commerce-admin
-   \`\`\`
+# 1. Clone the repository
+git clone https://github.com/your-username/e-commerce-admin.git
+cd e-commerce-admin
 
-2. **Install dependencies**  
-   \`\`\`bash
-   npm install
-   # or
-   yarn install
-   \`\`\`
+# 2. Install dependencies
+npm install
+# or if you prefer Yarn:
+# yarn install
 
-3. **Configure environment**  
-   Create a \`.env\` file in the project root:
-   \`\`\`env
-   DATABASE_URL=your_database_url
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
-   CLERK_SECRET_KEY=your_clerk_secret
-   RAZORPAY_KEY_ID=your_razorpay_id
-   RAZORPAY_KEY_SECRET=your_razorpay_secret
-   EMAIL_API_KEY=your_resend_key
-   \`\`\`
+# 3. Create environment file
+cat > .env <<EOF
+DATABASE_URL=your_database_url
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+CLERK_SECRET_KEY=your_clerk_secret
+RAZORPAY_KEY_ID=your_razorpay_id
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+EMAIL_API_KEY=your_resend_key
+EOF
 
-4. **Run database migrations**  
-   \`\`\`bash
-   npx prisma migrate dev --name init
-   \`\`\`
+# 4. Run database migrations
+npx prisma migrate dev --name init
 
-5. **Start the development server**  
-   \`\`\`bash
-   npm run dev
-   # or
-   yarn dev
-   \`\`\`
+# 5. Start the development server
+npm run dev
+# or
+# yarn dev
 
-Visit [http://localhost:3000](http://localhost:3000) to explore your admin platform.
-
----
-
-## 🎉 Usage
-
-- Navigate the sidebar to manage stores, products, coupons, billboards, and settings.  
-- Use the “API” section to copy endpoints and payload examples for integrations.  
-- Monitor real‑time charts and metrics in the analytics dashboard.
+# 🚀 Visit http://localhost:3001 to start using your e-commerce admin platform
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork this repository.  
-2. Create a new branch:  
-   \`\`\`bash
-   git checkout -b feature/your-feature-name
-   \`\`\`  
-3. Make your changes and commit:  
-   \`\`\`bash
-   git commit -m "feat: add your-feature-name"
-   \`\`\`  
-4. Push to your branch:  
-   \`\`\`bash
-   git push origin feature/your-feature-name
-   \`\`\`  
-5. Open a Pull Request.
+Contributions, issues, and feature requests are welcome! 🎉
 
-Please run \`npm run lint\` and include tests when applicable.
+1. Fork the repository  
+2. Create your feature branch (\`git checkout -b feature/YourFeature\`)  
+3. Commit your changes (\`git commit -m 'Add some feature'\`)  
+4. Push to the branch (\`git push origin feature/YourFeature\`)  
+5. Open a pull request  
 
 ---
 
-## 📄 License
+## 📝 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 EOF
