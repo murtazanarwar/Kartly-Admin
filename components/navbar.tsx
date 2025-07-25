@@ -27,14 +27,16 @@ const Navbar = async () => {
     <div className="border-b">
         <div className="flex h-16 items-center px-4">
             <StoreSwitcher items={stores}/>
+            <div className="ml-4">      
+                <Link href={`${process.env.FRONTEND_STORE_URL}`}>
+                  <Button variant="outline" className="gap-2">
+                    <StoreIcon className="w-4 h-4" />
+                    Go to Store
+                  </Button>
+                </Link>
+            </div>
             <MainNav className="mx-6"/>
             <div className="ml-auto flex items-center space-x-4">
-              <Link href={`${process.env.FRONTEND_STORE_URL}`}>
-                <Button variant="outline" className="gap-2">
-                  <StoreIcon className="w-4 h-4" />
-                  Go to Store
-                </Button>
-              </Link>
               <div className="hidden sm:block">
                 <ThemeToggle />
               </div>
