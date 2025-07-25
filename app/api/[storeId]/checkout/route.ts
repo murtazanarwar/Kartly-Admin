@@ -26,7 +26,7 @@ const bodySchema = z.object({
   address: z.string().min(5, "Please enter a valid shipping address"),
   customerId: z.string().nonempty("Customer ID is required"),
   discount: z.number().default(0),
-  couponId: z.string().optional(),
+  couponId: z.string().nullable().optional(),
 });
 
 export async function OPTIONS() {
