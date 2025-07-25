@@ -8,7 +8,7 @@ import StoreSwitcher from "@/components/store-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { StoreIcon } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 const Navbar = async () => {
   const { userId } = auth();
@@ -27,10 +27,10 @@ const Navbar = async () => {
     <div className="border-b">
         <div className="flex h-16 items-center px-4">
             <StoreSwitcher items={stores}/>
-            <div className="ml-4">      
+            <div className="ml-2">      
                 <Link href={`${process.env.FRONTEND_STORE_URL}`}>
-                  <Button variant="outline" className="gap-2">
-                    <StoreIcon className="w-4 h-4" />
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <ShoppingCart className="w-4 h-4" />
                     Go to Store
                   </Button>
                 </Link>
