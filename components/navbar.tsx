@@ -6,6 +6,9 @@ import prismadb from "@/lib/prismadb";
 import { MainNav } from "@/components/main-nav";
 import StoreSwitcher from "@/components/store-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
+import { Button } from "./ui/button";
+import { StoreIcon } from "lucide-react";
 
 const Navbar = async () => {
   const { userId } = auth();
@@ -26,10 +29,16 @@ const Navbar = async () => {
             <StoreSwitcher items={stores}/>
             <MainNav className="mx-6"/>
             <div className="ml-auto flex items-center space-x-4">
-                <div className="hidden sm:block">
-                  <ThemeToggle />
-                </div>
-                <UserButton afterSignOutUrl="/" />
+              <Link href={`${process.env.FRONTEND_STORE_URL}`}>
+                <Button variant="outline" className="gap-2">
+                  <StoreIcon className="w-4 h-4" />
+                  Go to Store
+                </Button>
+              </Link>
+              <div className="hidden sm:block">
+                <ThemeToggle />
+              </div>
+              <UserButton afterSignOutUrl="/" />
             </div>
         </div>
     </div>
