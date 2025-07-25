@@ -31,7 +31,7 @@ const Navbar = async () => {
                 <Link href={`${process.env.FRONTEND_STORE_URL}`}>
                   <Button variant="outline" size="sm" className="gap-2">
                     <ShoppingCart className="w-4 h-4" />
-                    Go to Store
+                    <span className="hidden sm:block">Go to Store</span>
                   </Button>
                 </Link>
             </div>
