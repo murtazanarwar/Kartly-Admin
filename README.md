@@ -1,3 +1,12 @@
+## 🧪 Demo Credentials
+
+for quick demo, use the following account:
+
+| Role       | Email                     | Password   |
+| ---------- | ------------------------- | ---------- |
+| Admin User | demo-admin@kartly.com     | Demo@976#  |
+
+Simply sign in at the Clerk-powered login page with these credentials.  
 ## 📖 Project Overview
 
 🛒 **Kartly Admin Platform** is a fully‑featured back‑office dashboard for running one or multiple e‑commerce storefronts. It provides:
