@@ -180,7 +180,7 @@ npm run build
 ### 4. Start the production server
 
 ```bash
-npm start
+npm run start
 ```
 
 
