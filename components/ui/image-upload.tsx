@@ -28,9 +28,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     }, []);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const onUpload = ( result: any ) => {
-        onChange(result.info.secure_url); 
-    }
+    const handleSuccess = (result: any, widget: any) => {
+        if (result.event === "success") {
+            onChange(result.info.secure_url);
+        }
+    };
 
     if(!isMounted) {
         return null;
@@ -55,7 +57,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                     </div>
                 ))}
             </div>
-            <CldUploadWidget onSuccess={onUpload} uploadPreset="householderhub" >
+            <CldUploadWidget 
+                onSuccess={handleSuccess} 
+                uploadPreset="householderhub"
+                options={{
+                    multiple: true,
+                    maxFiles: 10
+                }}
+            >
                 {({open}) => {
                     const onClick = () => {
                         open();
