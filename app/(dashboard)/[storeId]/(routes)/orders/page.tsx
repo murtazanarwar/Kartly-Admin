@@ -23,9 +23,8 @@ const OrdersPage = async ({ params } : { params: { storeId: string }}) => {
   });
 
   const formattedOrders: OrderColumn[] = orders.map((order) => {
-    // compute total as sum of (price * quantity)
     const rawTotal = order.orderItems.reduce((sum, oi) => {
-      const price = Number(oi.product.price);            // ensure numeric
+      const price = Number(oi.product.price);            
       return sum + price * oi.quantity;
     }, 0);
 
