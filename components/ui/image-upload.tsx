@@ -29,6 +29,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleSuccess = (result: any, widget: any) => {
+        console.log(widget);
         if (result.event === "success") {
             onChange(result.info.secure_url);
         }
