@@ -4,7 +4,7 @@ for quick demo, use the following account:
 
 | Role       | Email                     | Password   |
 | ---------- | ------------------------- | ---------- |
-| Admin User | demo-admin@kartly.com     | Demo@976#  |
+| Admin User | murtazanarwar@gmail.com     | Demo@976#  |
 
 Simply sign in at the Clerk-powered login page with these credentials.  
 ## 📖 Project Overview
